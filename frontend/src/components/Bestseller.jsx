@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useMemo } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import Title from './Title';
 import ProductItem from './ProductItem';
@@ -6,12 +6,9 @@ import ProductItem from './ProductItem';
 const Bestseller = () => {
 
     const { products } = useContext(ShopContext);
-    const [ bestseller, setBestseller ] = useState([]);
-
-    useEffect(()=>{
-        const bestProduct = products.filter((item)=>(item.bestseller));
-        setBestseller(bestProduct.slice(0, 5))
-    },[products])
+    const bestseller = useMemo(() => {
+        return products.filter((item) => item.bestseller).slice(0, 5);
+    }, [products]);
 
   return (
     <div className='my-10'>
