@@ -6,11 +6,11 @@ import ProductItem from '../components/ProductItem'
 
 const Collection = () => {
 
-  const { products } = useContext(ShopContext);
-  const [category, setCategory] = useState([]);
-  const [subCategory, setSubCategory] = useState([]);
-  const [sortType, setSortType] = useState('relevant');
-  const [showFilter, setShowFilter] = useState(false);
+  const { products, search, showSearch } = useContext(ShopContext);
+  const [ category, setCategory ] = useState([]);
+  const [ subCategory, setSubCategory ] = useState([]);
+  const [ sortType, setSortType ] = useState('relevant');
+  const [ showFilter, setShowFilter ] = useState(false);
 
   // Toggles (Keep these the same)
   const toggleCategory = (e) => { 
@@ -37,6 +37,11 @@ const Collection = () => {
       tempProducts = tempProducts.filter(item => subCategory.includes(item.subCategory));
     }
 
+    // 3. Filter by Search
+    if (showSearch && search) {
+      tempProducts = tempProducts.filter(item => item.name.toLowerCase().includes(search.toLowerCase()))
+    }
+
     // 3. Sort
     if (sortType === 'low-high') {
       tempProducts.sort((a, b) => a.price - b.price);
@@ -45,7 +50,7 @@ const Collection = () => {
     }
 
     return tempProducts;
-  }, [products, category, subCategory, sortType]); // Only re-calculates if these change
+  }, [products, category, subCategory, sortType, search, showSearch]); // Only re-calculates if these change
 
   
 
