@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useState, useMemo } from 'react'
 import { ShopContext } from '../context/ShopContext'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
@@ -7,39 +7,47 @@ import ProductItem from '../components/ProductItem'
 const Collection = () => {
 
   const { products } = useContext(ShopContext);
-  const [showFilter, setShowFilter] = useState(false);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
+  const [sortType, setSortType] = useState('relevant');
+  const [showFilter, setShowFilter] = useState(false);
 
-  const toggleCategory = (e) => {
-    if (category.includes(e.target.value)) {
-      setCategory(prev=>prev.filter(item => item !== e.target.value))
-    } else {
-      setCategory(prev => [...prev, e.target.value])
-    }
-  }
+  // Toggles (Keep these the same)
+  const toggleCategory = (e) => { 
+    const value = e.target.value;
+    setCategory(prev => prev.includes(value) ? prev.filter(i => i !== value) : [...prev, value]);
+  };
 
   const togglesubCategory = (e) => {
-    if (category.includes(e.target.value)) {
-      setCategory(prev=>prev.filter(item => item !== e.target.value))
-    } else {
-      setCategory(prev => [...prev, e.target.value])
-    }
-  }
+    const value = e.target.value;
+    setSubCategory(prev => prev.includes(value) ? prev.filter(i => i !== value) : [...prev, value]);
+  };
 
-  const filterProducts = (() => {
-    let productCopy = products.slice();
+  // --- THE REFACTOR ---
+  const filteredProducts = useMemo(() => {
+    let tempProducts = [...products];
 
+    // 1. Filter by Category
     if (category.length > 0) {
-      productCopy = productCopy.filter(item => category.includes(item.category))
+      tempProducts = tempProducts.filter(item => category.includes(item.category));
     }
 
+    // 2. Filter by Sub-Category
     if (subCategory.length > 0) {
-      productCopy = productCopy.filter(item => subCategory.includes(item.subCategory))
+      tempProducts = tempProducts.filter(item => subCategory.includes(item.subCategory));
     }
-    
-    return productCopy;
-  })();
+
+    // 3. Sort
+    if (sortType === 'low-high') {
+      tempProducts.sort((a, b) => a.price - b.price);
+    } else if (sortType === 'high-low') {
+      tempProducts.sort((a, b) => b.price - a.price);
+    }
+
+    return tempProducts;
+  }, [products, category, subCategory, sortType]); // Only re-calculates if these change
+
+  
 
   return (
     <div className='flex flex-cols sm:flex-row gap-1 sm:gap-10 pt-10 border-t'>
@@ -71,13 +79,13 @@ const Collection = () => {
           <p className='mb-3 text-sm font-medium'>Type</p>
           <div className='flex flex-col gap-2 text-sm font-light text-gray-700'>
             <p className='flex gap-2'>
-              <input type="checkbox" className='w-3' value={'Shirts and Blouses'} onChange={togglesubCategory}/> Shirts and Blouses
+              <input type="checkbox" className='w-3' value={'Topwear'} onChange={togglesubCategory}/> Shirts and Blouses
             </p>
             <p className='flex gap-2'>
-              <input type="checkbox" className='w-3' value={'Pants and Shorts'} onChange={togglesubCategory}/> Pants and Shorts
+              <input type="checkbox" className='w-3' value={'Bottomwear'} onChange={togglesubCategory}/> Pants and Shorts
             </p>
             <p className='flex gap-2'>
-              <input type="checkbox" className='w-3' value={'Jackets and Cardigans'} onChange={togglesubCategory}/> Jackets and Cardigans
+              <input type="checkbox" className='w-3' value={'Winterwear'} onChange={togglesubCategory}/> Jackets and Cardigans
             </p>
           </div>
         </div>
@@ -88,17 +96,17 @@ const Collection = () => {
           <Title text1={'All'} text2={'Collections'} />
 
           {/* Product Sort */}
-          <select name="" id="" className='border-2 border-gray-300 text-sm px-22'>
-            <option value="">Sort by: Relevance</option>
-            <option value="">Sort by: Low to High</option>
-            <option value="">Sort by: High to Low</option>
+          <select onChange={(e)=>setSortType(e.target.value)} className='border-2 border-gray-300 text-sm px-22'>
+            <option value="relevant">Sort by: Relevance</option>
+            <option value="low-high">Sort by: Low to High</option>
+            <option value="high-low">Sort by: High to Low</option>
           </select>
         </div>
 
         {/* Map Products */}
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6'>
           {
-            filterProducts.map((item, index)=>(
+            filteredProducts.map((item, index)=>(
               <ProductItem key={index} id={item._id} image={item.image} name={item.name} price={item.price}>
               
               </ProductItem>
