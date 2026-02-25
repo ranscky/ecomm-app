@@ -101,7 +101,7 @@ const Collection = () => {
           <Title text1={'All'} text2={'Collections'} />
 
           {/* Product Sort */}
-          <select onChange={(e)=>setSortType(e.target.value)} className='border-2 border-gray-300 text-sm px-22'>
+          <select onChange={(e)=>setSortType(e.target.value)} className='w-3xs border-2 border-gray-300 text-sm px-12'>
             <option value="relevant">Sort by: Relevance</option>
             <option value="low-high">Sort by: Low to High</option>
             <option value="high-low">Sort by: High to Low</option>
